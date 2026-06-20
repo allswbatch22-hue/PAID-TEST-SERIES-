@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exam Management</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+
+body{
+margin:0;
+font-family:Segoe UI,sans-serif;
+background:#f5f7fb;
+}
+
+.header{
+background:#2563eb;
+color:white;
+padding:20px;
+font-size:24px;
+font-weight:700;
+}
+
+.container{
+padding:20px;
+}
+
+.form-box{
+background:white;
+padding:20px;
+border-radius:15px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+margin-bottom:20px;
+}
+
+.input,
+.select{
+width:100%;
+padding:12px;
+margin-bottom:12px;
+border:1px solid #ddd;
+border-radius:10px;
+font-size:15px;
+}
+
+.btn{
+padding:12px 20px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+color:white;
+font-size:15px;
+}
+
+.add-btn{
+background:#10b981;
+}
+
+.exam-card{
+background:white;
+padding:20px;
+border-radius:15px;
+margin-bottom:15px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.exam-card img{
+width:100%;
+height:180px;
+object-fit:cover;
+border-radius:10px;
+margin-top:10px;
+}
+
+.actions{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:15px;
+}
+
+.active{
+background:#10b981;
+}
+
+.inactive{
+background:#f59e0b;
+}
+
+.delete{
+background:#ef4444;
+}
+
+</style>
+
+<script type="module">
+
+import { db } from "./firebase/firebase-config.js";
+
+import {
+collection,
+addDoc,
+getDocs,
+deleteDoc,
+updateDoc,
+doc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+window.loadCoaching = async()=>{
+
+const coachingSelect =
+document.getElementById("coaching");
+
+coachingSelect.innerHTML =
+'<option value="">Select Coaching</option>';
+
+const snap =
+await getDocs(
+collection(db,"coaching")
+);
+
+snap.forEach(item=>{
+
+const data=item.data();
+
+coachingSelect.innerHTML += `
+<option value="${data.name}">
+${data.name}
+</option>
+`;
+
+});
+
+}
+
+window.addExam = async()=>{
+
+const coaching =
+document.getElementById("coaching").value;
+
+const examName =
+document.getElementById("examName").value;
+
+const banner =
+document.getElementById("banner").value;
+
+if(!coaching || !examName){
+
+alert("Fill All Fields");
+return;
+
+}
+
+await addDoc(
+collection(db,"exams"),
+{
+coaching:coaching,
+examName:examName,
+banner:banner,
+status:"active",
+createdAt:new Date()
+}
+);
+
+document.getElementById("examName").value="";
+document.getElementById("banner").value="";
+
+loadExams();
+
+}
+
+window.loadExams = async()=>{
+
+const snap =
+await getDocs(
+collection(db,"exams")
+);
+
+let html="";
+
+snap.forEach(item=>{
+
+const data=item.data();
+
+html += `
+
+<div class="exam-card">
+
+<h2>${data.examName}</h2>
+
+<p><b>Coaching:</b> ${data.coaching}</p>
+
+<p><b>Status:</b> ${data.status}</p>
+
+<img src="${
+data.banner ||
+'https://via.placeholder.com/800x250'
+}">
+
+<div class="actions">
+
+<button
+class="btn active"
+onclick="activateExam('${item.id}')">
+Activate
+</button>
+
+<button
+class="btn inactive"
+onclick="deactivateExam('${item.id}')">
+Deactivate
+</button>
+
+<button
+class="btn delete"
+onclick="deleteExam('${item.id}')">
+Delete
+</button>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+document.getElementById("examList")
+.innerHTML = html;
+
+}
+
+window.activateExam = async(id)=>{
+
+await updateDoc(
+doc(db,"exams",id),
+{
+status:"active"
+}
+);
+
+loadExams();
+
+}
+
+window.deactivateExam = async(id)=>{
+
+await updateDoc(
+doc(db,"exams",id),
+{
+status:"inactive"
+}
+);
+
+loadExams();
+
+}
+
+window.deleteExam = async(id)=>{
+
+if(!confirm("Delete Exam ?")) return;
+
+await deleteDoc(
+doc(db,"exams",id)
+);
+
+loadExams();
+
+}
+
+window.onload = async()=>{
+
+await loadCoaching();
+await loadExams();
+
+}
+
+</script>
+
+</head>
+
+<body>
+
+<div class="header">
+Exam Management
+</div>
+
+<div class="container">
+
+<div class="form-box">
+
+<select
+id="coaching"
+class="select">
+<option>
+Loading Coaching...
+</option>
+</select>
+
+<input
+type="text"
+id="examName"
+class="input"
+placeholder="Exam Name">
+
+<input
+type="text"
+id="banner"
+class="input"
+placeholder="Banner Image URL">
+
+<button
+class="btn add-btn"
+onclick="addExam()">
+Add Exam
+</button>
+
+</div>
+
+<div id="examList">
+
+</div>
+
+</div>
+
+</body>
+</html>
