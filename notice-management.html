@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notice Management</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+
+body{
+margin:0;
+font-family:Segoe UI,sans-serif;
+background:#f5f7fb;
+}
+
+.header{
+background:#2563eb;
+color:white;
+padding:20px;
+font-size:24px;
+font-weight:700;
+}
+
+.container{
+padding:20px;
+}
+
+.form-box{
+background:white;
+padding:20px;
+border-radius:15px;
+margin-bottom:20px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.input,
+.textarea{
+width:100%;
+padding:12px;
+border:1px solid #ddd;
+border-radius:10px;
+margin-bottom:12px;
+box-sizing:border-box;
+}
+
+.textarea{
+height:120px;
+resize:none;
+}
+
+.btn{
+padding:12px 20px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+color:white;
+}
+
+.add-btn{
+background:#10b981;
+}
+
+.active{
+background:#10b981;
+}
+
+.inactive{
+background:#f59e0b;
+}
+
+.delete{
+background:#ef4444;
+}
+
+.notice-card{
+background:white;
+padding:20px;
+border-radius:15px;
+margin-bottom:15px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.notice-card h3{
+margin-top:0;
+}
+
+.actions{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:15px;
+}
+
+</style>
+
+<script type="module">
+
+import { db } from "./firebase/firebase-config.js";
+
+import {
+collection,
+addDoc,
+getDocs,
+deleteDoc,
+updateDoc,
+doc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+window.addNotice = async()=>{
+
+const title =
+document.getElementById("title").value;
+
+const description =
+document.getElementById("description").value;
+
+if(!title || !description){
+
+alert("Fill All Fields");
+return;
+
+}
+
+await addDoc(
+collection(db,"notices"),
+{
+title:title,
+description:description,
+status:"active",
+createdAt:new Date()
+}
+);
+
+document.getElementById("title").value="";
+document.getElementById("description").value="";
+
+loadNotices();
+
+}
+
+window.loadNotices = async()=>{
+
+const snap =
+await getDocs(
+collection(db,"notices")
+);
+
+let html="";
+
+snap.forEach(item=>{
+
+const data=item.data();
+
+html += `
+
+<div class="notice-card">
+
+<h3>${data.title}</h3>
+
+<p>${data.description}</p>
+
+<p><b>Status:</b> ${data.status}</p>
+
+<div class="actions">
+
+<button
+class="btn active"
+onclick="activateNotice('${item.id}')">
+Activate
+</button>
+
+<button
+class="btn inactive"
+onclick="deactivateNotice('${item.id}')">
+Deactivate
+</button>
+
+<button
+class="btn delete"
+onclick="deleteNotice('${item.id}')">
+Delete
+</button>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+document.getElementById("noticeList").innerHTML =
+html;
+
+}
+
+window.activateNotice = async(id)=>{
+
+await updateDoc(
+doc(db,"notices",id),
+{
+status:"active"
+}
+);
+
+loadNotices();
+
+}
+
+window.deactivateNotice = async(id)=>{
+
+await updateDoc(
+doc(db,"notices",id),
+{
+status:"inactive"
+}
+);
+
+loadNotices();
+
+}
+
+window.deleteNotice = async(id)=>{
+
+if(!confirm("Delete Notice ?"))
+return;
+
+await deleteDoc(
+doc(db,"notices",id)
+);
+
+loadNotices();
+
+}
+
+window.onload=loadNotices;
+
+</script>
+
+</head>
+
+<body>
+
+<div class="header">
+Notice Management
+</div>
+
+<div class="container">
+
+<div class="form-box">
+
+<input
+type="text"
+id="title"
+class="input"
+placeholder="Notice Title">
+
+<textarea
+id="description"
+class="textarea"
+placeholder="Notice Description"></textarea>
+
+<button
+class="btn add-btn"
+onclick="addNotice()">
+Add Notice
+</button>
+
+</div>
+
+<div id="noticeList">
+
+</div>
+
+</div>
+
+</body>
+</html>
