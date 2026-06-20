@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>CBT Result</title>
+<title>Test Result</title>
 
 <style>
 
@@ -21,7 +21,7 @@ padding:20px;
 }
 
 .container{
-max-width:1000px;
+max-width:1100px;
 margin:auto;
 }
 
@@ -49,17 +49,57 @@ box-shadow:0 5px 15px rgba(0,0,0,.08);
 }
 
 .card h2{
-font-size:28px;
+font-size:30px;
 margin-bottom:10px;
+}
+
+.card p{
+font-size:15px;
+color:#555;
+}
+
+.correct{
+border-left:5px solid #16a34a;
+}
+
+.wrong{
+border-left:5px solid #dc2626;
+}
+
+.score{
+border-left:5px solid #2563eb;
+}
+
+.percent{
+border-left:5px solid #f59e0b;
+}
+
+.summary{
+background:white;
+padding:25px;
+margin-top:20px;
+border-radius:15px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.summary div{
+padding:10px 0;
+border-bottom:1px solid #eee;
+}
+
+.rank{
+font-size:22px;
+font-weight:bold;
+color:#7c3aed;
 }
 
 .pass{
 background:#16a34a;
 color:white;
 padding:15px;
-border-radius:15px;
-margin-top:20px;
 text-align:center;
+border-radius:12px;
+margin-top:20px;
 font-size:20px;
 font-weight:bold;
 }
@@ -68,22 +108,28 @@ font-weight:bold;
 background:#dc2626;
 color:white;
 padding:15px;
-border-radius:15px;
-margin-top:20px;
 text-align:center;
+border-radius:12px;
+margin-top:20px;
 font-size:20px;
 font-weight:bold;
 }
 
+.btns{
+display:flex;
+gap:15px;
+margin-top:20px;
+flex-wrap:wrap;
+}
+
 .btn{
-width:100%;
+flex:1;
 padding:15px;
 border:none;
 border-radius:12px;
-margin-top:15px;
+cursor:pointer;
 font-size:16px;
 font-weight:bold;
-cursor:pointer;
 color:white;
 }
 
@@ -91,8 +137,8 @@ color:white;
 background:#2563eb;
 }
 
-.dashboard{
-background:#0f766e;
+.home{
+background:#16a34a;
 }
 
 </style>
@@ -104,62 +150,70 @@ background:#0f766e;
 
 <div class="header">
 
-<h1>Test Result</h1>
+<h1>CBT Test Result</h1>
 
-<p>Detailed Performance Analysis</p>
+<p>Detailed Performance Report</p>
 
 </div>
 
 <div class="grid">
 
-<div class="card">
-<h2 id="totalQuestions">0</h2>
-<p>Total Questions</p>
-</div>
-
-<div class="card">
-<h2 id="attempted">0</h2>
-<p>Attempted</p>
-</div>
-
-<div class="card">
+<div class="card correct">
 <h2 id="correct">0</h2>
 <p>Correct</p>
 </div>
 
-<div class="card">
+<div class="card wrong">
 <h2 id="wrong">0</h2>
 <p>Wrong</p>
 </div>
 
-<div class="card">
-<h2 id="skipped">0</h2>
-<p>Skipped</p>
-</div>
-
-<div class="card">
+<div class="card score">
 <h2 id="score">0</h2>
 <p>Score</p>
 </div>
 
-<div class="card">
+<div class="card percent">
 <h2 id="percentage">0%</h2>
 <p>Percentage</p>
 </div>
 
-<div class="card">
-<h2 id="accuracy">0%</h2>
-<p>Accuracy</p>
 </div>
 
-<div class="card">
-<h2 id="rank">D</h2>
-<p>Rank</p>
+<div class="summary">
+
+<div>
+<b>Total Questions :</b>
+<span id="totalQuestions">0</span>
 </div>
+
+<div>
+<b>Attempted :</b>
+<span id="attempted">0</span>
+</div>
+
+<div>
+<b>Skipped :</b>
+<span id="skipped">0</span>
+</div>
+
+<div>
+<b>Accuracy :</b>
+<span id="accuracy">0</span>%
+</div>
+
+<div>
+<b>Rank :</b>
+<span class="rank" id="rank">
+Rank D
+</span>
+</div>
+
+<div id="statusBox"></div>
 
 </div>
 
-<div id="resultStatus"></div>
+<div class="btns">
 
 <button
 class="btn review"
@@ -168,68 +222,55 @@ Answer Review
 </button>
 
 <button
-class="btn dashboard"
+class="btn home"
 onclick="window.location.href='index.html'">
-Back To Home
+Dashboard
 </button>
 
 </div>
 
+</div>
+
 <script>
+
+const correct =
+Number(
+localStorage.getItem("result_correct")
+) || 0;
+
+const wrong =
+Number(
+localStorage.getItem("result_wrong")
+) || 0;
+
+const score =
+Number(
+localStorage.getItem("result_score")
+) || 0;
+
+const percentage =
+Number(
+localStorage.getItem("result_percentage")
+) || 0;
+
+const attempted =
+Number(
+localStorage.getItem("result_attempted")
+) || 0;
 
 const questions =
 JSON.parse(
 localStorage.getItem("questions_data")
 ) || [];
 
-const answers =
-JSON.parse(
-localStorage.getItem("user_answers")
-) || {};
-
-let correct=0;
-let wrong=0;
-let attempted=0;
-
-questions.forEach((q,index)=>{
-
-if(answers[index]!==undefined){
-
-attempted++;
-
-if(
-answers[index]===q.answer
-){
-
-correct++;
-
-}else{
-
-wrong++;
-
-}
-
-}
-
-});
-
-const totalQuestions=
+const totalQuestions =
 questions.length;
 
-const skipped=
-totalQuestions-attempted;
+const skipped =
+totalQuestions - attempted;
 
-const score=
-(correct*2)-
-(wrong*0.25);
-
-const percentage=
-(
-(correct/totalQuestions)*100
-).toFixed(2);
-
-const accuracy=
-attempted>0
+const accuracy =
+attempted > 0
 ?
 (
 (correct/attempted)*100
@@ -237,58 +278,17 @@ attempted>0
 :
 0;
 
-let rank="D";
-
-if(score>=180){
-
-rank="A+";
-
-}
-else if(score>=160){
-
-rank="A";
-
-}
-else if(score>=140){
-
-rank="B";
-
-}
-else if(score>=120){
-
-rank="C";
-
-}
-
-document.getElementById(
-"totalQuestions"
-).innerHTML=
-totalQuestions;
-
-document.getElementById(
-"attempted"
-).innerHTML=
-attempted;
-
 document.getElementById(
 "correct"
-).innerHTML=
-correct;
+).innerHTML=correct;
 
 document.getElementById(
 "wrong"
-).innerHTML=
-wrong;
-
-document.getElementById(
-"skipped"
-).innerHTML=
-skipped;
+).innerHTML=wrong;
 
 document.getElementById(
 "score"
-).innerHTML=
-score;
+).innerHTML=score;
 
 document.getElementById(
 "percentage"
@@ -296,40 +296,67 @@ document.getElementById(
 percentage+"%";
 
 document.getElementById(
+"attempted"
+).innerHTML=
+attempted;
+
+document.getElementById(
+"skipped"
+).innerHTML=
+skipped;
+
+document.getElementById(
 "accuracy"
 ).innerHTML=
-accuracy+"%";
+accuracy;
+
+document.getElementById(
+"totalQuestions"
+).innerHTML=
+totalQuestions;
+
+let rank="Rank D";
+
+if(score>=180){
+
+rank="Rank A+";
+
+}
+else if(score>=160){
+
+rank="Rank A";
+
+}
+else if(score>=140){
+
+rank="Rank B";
+
+}
+else if(score>=120){
+
+rank="Rank C";
+
+}
 
 document.getElementById(
 "rank"
-).innerHTML=
-rank;
+).innerHTML=rank;
 
-if(Number(percentage)>=80){
+if(percentage>=80){
 
 document.getElementById(
-"resultStatus"
+"statusBox"
 ).innerHTML=
 '<div class="pass">PASS</div>';
 
 }else{
 
 document.getElementById(
-"resultStatus"
+"statusBox"
 ).innerHTML=
 '<div class="fail">FAIL</div>';
 
 }
-
-localStorage.setItem(
-"result_score",
-score
-);
-
-localStorage.setItem(
-"result_percentage",
-percentage
-);
 
 </script>
 
