@@ -20,13 +20,30 @@ background:#f1f5f9;
 padding:20px;
 }
 
+.container{
+max-width:1200px;
+margin:auto;
+}
+
 .header{
-background:#1e3a8a;
+background:linear-gradient(135deg,#2563eb,#1d4ed8);
 color:white;
+padding:25px;
+border-radius:20px;
+text-align:center;
+margin-bottom:20px;
+}
+
+.summary{
+background:white;
 padding:20px;
 border-radius:15px;
 margin-bottom:20px;
-text-align:center;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.summary h2{
+margin-bottom:15px;
 }
 
 .review-card{
@@ -45,57 +62,67 @@ margin-bottom:15px;
 
 .option{
 padding:12px;
-border-radius:10px;
 margin-bottom:8px;
+border-radius:10px;
 background:#f8fafc;
+border:1px solid #ddd;
 }
 
 .correct{
 background:#16a34a;
 color:white;
+border:none;
 }
 
 .wrong{
 background:#dc2626;
 color:white;
+border:none;
 }
 
 .user-answer{
 background:#f59e0b;
 color:white;
+border:none;
 }
 
 .solution{
+margin-top:15px;
+padding:15px;
 background:#eff6ff;
 border-left:5px solid #2563eb;
-padding:15px;
-margin-top:15px;
 border-radius:10px;
 }
 
-.summary{
-background:white;
-padding:20px;
-border-radius:15px;
-margin-bottom:20px;
-box-shadow:0 5px 15px rgba(0,0,0,.08);
-}
-
-.back-btn{
+.btn{
 width:100%;
 padding:15px;
 border:none;
+border-radius:12px;
 background:#2563eb;
 color:white;
 font-size:16px;
-border-radius:10px;
+font-weight:bold;
 cursor:pointer;
+margin-top:20px;
+}
+
+.correct-count{
+color:#16a34a;
+font-weight:bold;
+}
+
+.wrong-count{
+color:#dc2626;
+font-weight:bold;
 }
 
 </style>
 </head>
 
 <body>
+
+<div class="container">
 
 <div class="header">
 
@@ -107,9 +134,7 @@ cursor:pointer;
 
 <div class="summary">
 
-<h2>Review Summary</h2>
-
-<br>
+<h2>Summary</h2>
 
 <p>
 Total Questions :
@@ -117,30 +142,34 @@ Total Questions :
 </p>
 
 <p>
-Attempted :
-<span id="attemptedQuestions">0</span>
-</p>
-
-<p>
 Correct :
-<span id="correctQuestions">0</span>
+<span
+id="correctQuestions"
+class="correct-count">
+0
+</span>
 </p>
 
 <p>
 Wrong :
-<span id="wrongQuestions">0</span>
+<span
+id="wrongQuestions"
+class="wrong-count">
+0
+</span>
 </p>
 
 </div>
 
-<div id="reviewContainer">
-</div>
+<div id="reviewContainer"></div>
 
 <button
-class="back-btn"
+class="btn"
 onclick="window.location.href='result.html'">
 Back To Result
 </button>
+
+</div>
 
 <script>
 
@@ -154,11 +183,10 @@ JSON.parse(
 localStorage.getItem("user_answers")
 ) || {};
 
+let html="";
+
 let correct=0;
 let wrong=0;
-let attempted=0;
-
-let html="";
 
 questions.forEach((q,index)=>{
 
@@ -169,8 +197,6 @@ const correctAnswer =
 q.answer;
 
 if(userAnswer !== undefined){
-
-attempted++;
 
 if(userAnswer == correctAnswer){
 
@@ -269,11 +295,6 @@ document.getElementById(
 "totalQuestions"
 ).innerHTML =
 questions.length;
-
-document.getElementById(
-"attemptedQuestions"
-).innerHTML =
-attempted;
 
 document.getElementById(
 "correctQuestions"
