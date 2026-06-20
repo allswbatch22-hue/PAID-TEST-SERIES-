@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin Payments Panel</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,sans-serif;
+}
+
+body{
+background:#f1f5f9;
+}
+
+.header{
+background:#2563eb;
+color:white;
+padding:20px;
+font-size:25px;
+font-weight:bold;
+}
+
+.container{
+padding:20px;
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:15px;
+margin-bottom:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:15px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.card h2{
+color:#2563eb;
+}
+
+.search-box{
+margin-bottom:20px;
+}
+
+.search-box input{
+width:100%;
+padding:12px;
+border:1px solid #ddd;
+border-radius:10px;
+}
+
+.payment-card{
+background:white;
+padding:20px;
+border-radius:15px;
+margin-bottom:15px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.payment-card img{
+width:100%;
+max-width:350px;
+border-radius:10px;
+margin-top:10px;
+border:1px solid #ddd;
+}
+
+.actions{
+display:flex;
+gap:10px;
+margin-top:15px;
+flex-wrap:wrap;
+}
+
+.btn{
+padding:10px 15px;
+border:none;
+border-radius:10px;
+color:white;
+cursor:pointer;
+}
+
+.approve{
+background:#16a34a;
+}
+
+.reject{
+background:#dc2626;
+}
+
+.code{
+background:#2563eb;
+}
+
+.buy-code-box{
+margin-top:15px;
+padding:12px;
+background:#eff6ff;
+border-radius:10px;
+font-weight:bold;
+display:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+Admin Payment Verification Panel
+</div>
+
+<div class="container">
+
+<div class="stats">
+
+<div class="card">
+<h2 id="totalPayments">0</h2>
+<p>Total Payments</p>
+</div>
+
+<div class="card">
+<h2 id="pendingPayments">0</h2>
+<p>Pending</p>
+</div>
+
+<div class="card">
+<h2 id="approvedPayments">0</h2>
+<p>Approved</p>
+</div>
+
+</div>
+
+<div class="search-box">
+
+<input
+type="text"
+id="searchInput"
+placeholder="Search Student Name..."
+onkeyup="searchPayments()">
+
+</div>
+
+<div id="paymentsContainer">
+
+Loading Payments...
+
+</div>
+
+</div>
+
+<script type="module">
+
+import { db }
+from "./firebase/firebase-config.js";
+
+import {
+collection,
+getDocs,
+doc,
+updateDoc,
+addDoc,
+serverTimestamp
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+let paymentData=[];
+
+function generateBuyCode(){
+
+const chars=
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+let code="";
+
+for(let i=0;i<12;i++){
+
+code+=chars.charAt(
+Math.floor(
+Math.random()*chars.length
+)
+);
+
+}
+
+return code;
+
+}
+
+window.loadPayments = async()=>{
+
+const snap=
+await getDocs(
+collection(db,"payments")
+);
+
+let html="";
+
+let total=0;
+let pending=0;
+let approved=0;
+
+paymentData=[];
+
+snap.forEach(item=>{
+
+const data=item.data();
+
+paymentData.push({
+id:item.id,
+...data
+});
+
+total++;
+
+if(data.status==="pending"){
+pending++;
+}
+
+if(data.status==="approved"){
+approved++;
+}
+
+html+=`
+
+<div class="payment-card">
+
+<h3>${data.studentName}</h3>
+
+<p><b>Mobile:</b> ${data.mobile}</p>
+
+<p><b>Exam:</b> ${data.exam}</p>
+
+<p><b>Amount:</b> ₹${data.amount}</p>
+
+<p><b>Status:</b> ${data.status}</p>
+
+<img src="${data.screenshot}">
+
+<div class="actions">
+
+<button
+class="btn approve"
+onclick="approvePayment('${item.id}','${data.exam}')">
+Approve
+</button>
+
+<button
+class="btn reject"
+onclick="rejectPayment('${item.id}')">
+Reject
+</button>
+
+<button
+class="btn code"
+onclick="createBuyCode('${data.exam}')">
+Generate Code
+</button>
+
+</div>
+
+<div
+class="buy-code-box"
+id="code_${item.id}">
+</div>
+
+</div>
+
+`;
+
+});
+
+document.getElementById(
+"paymentsContainer"
+).innerHTML=html;
+
+document.getElementById(
+"totalPayments"
+).innerHTML=total;
+
+document.getElementById(
+"pendingPayments"
+).innerHTML=pending;
+
+document.getElementById(
+"approvedPayments"
+).innerHTML=approved;
+
+}
+
+window.approvePayment = async(id)=>{
+
+await updateDoc(
+doc(db,"payments",id),
+{
+status:"approved",
+verifiedAt:serverTimestamp()
+}
+);
+
+alert("Payment Approved");
+
+loadPayments();
+
+}
+
+window.rejectPayment = async(id)=>{
+
+await updateDoc(
+doc(db,"payments",id),
+{
+status:"rejected"
+}
+);
+
+alert("Payment Rejected");
+
+loadPayments();
+
+}
+
+window.createBuyCode = async(exam)=>{
+
+const code=
+generateBuyCode();
+
+await addDoc(
+collection(db,"buycodes"),
+{
+code:code,
+exam:exam,
+used:false,
+status:"active",
+createdAt:serverTimestamp()
+}
+);
+
+alert(
+"Buy Code Generated:\n\n"+code
+);
+
+}
+
+window.searchPayments = ()=>{
+
+const value=
+document.getElementById(
+"searchInput"
+).value.toLowerCase();
+
+const cards=
+document.querySelectorAll(
+".payment-card"
+);
+
+cards.forEach(card=>{
+
+if(
+card.innerText
+.toLowerCase()
+.includes(value)
+){
+
+card.style.display="block";
+
+}else{
+
+card.style.display="none";
+
+}
+
+});
+
+}
+
+window.onload=loadPayments;
+
+</script>
+
+</body>
+</html>
