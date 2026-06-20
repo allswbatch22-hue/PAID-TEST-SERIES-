@@ -1,9 +1,291 @@
-localStorage.setItem(
-"user_answers",
-JSON.stringify(answers)
-);
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-localStorage.setItem(
-"questions_data",
-JSON.stringify(questions)
-);
+<title>Answer Review</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,sans-serif;
+}
+
+body{
+background:#f1f5f9;
+padding:20px;
+}
+
+.header{
+background:#1e3a8a;
+color:white;
+padding:20px;
+border-radius:15px;
+margin-bottom:20px;
+text-align:center;
+}
+
+.review-card{
+background:white;
+padding:20px;
+margin-bottom:20px;
+border-radius:15px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.question{
+font-size:18px;
+font-weight:bold;
+margin-bottom:15px;
+}
+
+.option{
+padding:12px;
+border-radius:10px;
+margin-bottom:8px;
+background:#f8fafc;
+}
+
+.correct{
+background:#16a34a;
+color:white;
+}
+
+.wrong{
+background:#dc2626;
+color:white;
+}
+
+.user-answer{
+background:#f59e0b;
+color:white;
+}
+
+.solution{
+background:#eff6ff;
+border-left:5px solid #2563eb;
+padding:15px;
+margin-top:15px;
+border-radius:10px;
+}
+
+.summary{
+background:white;
+padding:20px;
+border-radius:15px;
+margin-bottom:20px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.back-btn{
+width:100%;
+padding:15px;
+border:none;
+background:#2563eb;
+color:white;
+font-size:16px;
+border-radius:10px;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+
+<h1>Answer Review</h1>
+
+<p>Question Wise Analysis</p>
+
+</div>
+
+<div class="summary">
+
+<h2>Review Summary</h2>
+
+<br>
+
+<p>
+Total Questions :
+<span id="totalQuestions">0</span>
+</p>
+
+<p>
+Attempted :
+<span id="attemptedQuestions">0</span>
+</p>
+
+<p>
+Correct :
+<span id="correctQuestions">0</span>
+</p>
+
+<p>
+Wrong :
+<span id="wrongQuestions">0</span>
+</p>
+
+</div>
+
+<div id="reviewContainer">
+</div>
+
+<button
+class="back-btn"
+onclick="window.location.href='result.html'">
+Back To Result
+</button>
+
+<script>
+
+const questions =
+JSON.parse(
+localStorage.getItem("questions_data")
+) || [];
+
+const answers =
+JSON.parse(
+localStorage.getItem("user_answers")
+) || {};
+
+let correct=0;
+let wrong=0;
+let attempted=0;
+
+let html="";
+
+questions.forEach((q,index)=>{
+
+const userAnswer =
+answers[index];
+
+const correctAnswer =
+q.answer;
+
+if(userAnswer !== undefined){
+
+attempted++;
+
+if(userAnswer == correctAnswer){
+
+correct++;
+
+}else{
+
+wrong++;
+
+}
+
+}
+
+html += `
+
+<div class="review-card">
+
+<div class="question">
+
+Q${index+1}.
+${q.question}
+
+</div>
+
+`;
+
+q.options.forEach((option,optIndex)=>{
+
+let className="option";
+
+if(optIndex === correctAnswer){
+
+className += " correct";
+
+}
+
+if(
+userAnswer === optIndex &&
+userAnswer !== correctAnswer
+){
+
+className += " wrong";
+
+}
+
+html += `
+
+<div class="${className}">
+
+${String.fromCharCode(65+optIndex)}.
+${option}
+
+</div>
+
+`;
+
+});
+
+html += `
+
+<div class="solution">
+
+<b>Your Answer :</b>
+
+${
+userAnswer !== undefined
+? q.options[userAnswer]
+: "Not Attempted"
+}
+
+<br><br>
+
+<b>Correct Answer :</b>
+
+${q.options[correctAnswer]}
+
+<br><br>
+
+<b>Solution :</b>
+
+${q.solution || "Solution Not Available"}
+
+</div>
+
+</div>
+
+`;
+
+});
+
+document.getElementById(
+"reviewContainer"
+).innerHTML = html;
+
+document.getElementById(
+"totalQuestions"
+).innerHTML =
+questions.length;
+
+document.getElementById(
+"attemptedQuestions"
+).innerHTML =
+attempted;
+
+document.getElementById(
+"correctQuestions"
+).innerHTML =
+correct;
+
+document.getElementById(
+"wrongQuestions"
+).innerHTML =
+wrong;
+
+</script>
+
+</body>
+</html>
