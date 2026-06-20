@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Firebase Storage Upload</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,sans-serif;
+}
+
+body{
+background:#f1f5f9;
+padding:20px;
+}
+
+.card{
+max-width:700px;
+margin:auto;
+background:white;
+padding:25px;
+border-radius:15px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+h2{
+margin-bottom:20px;
+}
+
+input{
+width:100%;
+padding:12px;
+margin-bottom:15px;
+border:1px solid #ddd;
+border-radius:10px;
+}
+
+button{
+width:100%;
+padding:14px;
+border:none;
+background:#2563eb;
+color:white;
+font-size:16px;
+border-radius:10px;
+cursor:pointer;
+}
+
+.progress{
+margin-top:15px;
+font-weight:bold;
+}
+
+.url-box{
+margin-top:20px;
+padding:15px;
+background:#f8fafc;
+border-radius:10px;
+word-break:break-all;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Firebase Storage Upload</h2>
+
+<input
+type="file"
+id="fileInput">
+
+<button onclick="uploadFile()">
+Upload File
+</button>
+
+<div
+class="progress"
+id="progress">
+0%
+</div>
+
+<div
+class="url-box"
+id="downloadUrl">
+File URL Here
+</div>
+
+</div>
+
+<script type="module">
+
+import { app }
+from "./firebase/firebase-config.js";
+
+import {
+getStorage,
+ref,
+uploadBytesResumable,
+getDownloadURL
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+const storage =
+getStorage(app);
+
+window.uploadFile = ()=>{
+
+const file =
+document.getElementById(
+"fileInput"
+).files[0];
+
+if(!file){
+
+alert("Select File");
+return;
+
+}
+
+const fileName =
+Date.now()+"_"+file.name;
+
+const storageRef =
+ref(
+storage,
+"uploads/"+fileName
+);
+
+const uploadTask =
+uploadBytesResumable(
+storageRef,
+file
+);
+
+uploadTask.on(
+
+"state_changed",
+
+(snapshot)=>{
+
+const progress =
+(
+snapshot.bytesTransferred /
+snapshot.totalBytes
+)*100;
+
+document.getElementById(
+"progress"
+).innerHTML=
+
+progress.toFixed(0)+"%";
+
+},
+
+(error)=>{
+
+console.log(error);
+
+alert("Upload Failed");
+
+},
+
+()=>{
+
+getDownloadURL(
+uploadTask.snapshot.ref
+)
+
+.then((url)=>{
+
+document.getElementById(
+"downloadUrl"
+).innerHTML=url;
+
+navigator.clipboard
+.writeText(url);
+
+alert(
+"Upload Successful\nURL Copied"
+);
+
+});
+
+}
+
+);
+
+}
+
+</script>
+
+</body>
+</html>
