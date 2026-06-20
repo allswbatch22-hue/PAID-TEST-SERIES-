@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coupon Management</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+
+body{
+margin:0;
+font-family:Segoe UI,sans-serif;
+background:#f5f7fb;
+}
+
+.header{
+background:#2563eb;
+padding:20px;
+color:white;
+font-size:24px;
+font-weight:700;
+}
+
+.container{
+padding:20px;
+}
+
+.form-box{
+background:white;
+padding:20px;
+border-radius:15px;
+margin-bottom:20px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.input{
+width:100%;
+padding:12px;
+margin-bottom:12px;
+border:1px solid #ddd;
+border-radius:10px;
+}
+
+.btn{
+padding:12px 20px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+color:white;
+}
+
+.add-btn{
+background:#10b981;
+}
+
+.coupon-card{
+background:white;
+padding:20px;
+border-radius:15px;
+margin-bottom:15px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.actions{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:15px;
+}
+
+.active{
+background:#10b981;
+}
+
+.inactive{
+background:#f59e0b;
+}
+
+.delete{
+background:#ef4444;
+}
+
+</style>
+
+<script type="module">
+
+import { db } from "./firebase/firebase-config.js";
+
+import {
+collection,
+addDoc,
+getDocs,
+deleteDoc,
+updateDoc,
+doc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+window.addCoupon = async()=>{
+
+const code =
+document.getElementById("code").value.trim().toUpperCase();
+
+const discount =
+document.getElementById("discount").value;
+
+const expiry =
+document.getElementById("expiry").value;
+
+if(!code || !discount || !expiry){
+
+alert("Fill All Fields");
+return;
+
+}
+
+await addDoc(
+collection(db,"coupons"),
+{
+code:code,
+discount:Number(discount),
+expiry:expiry,
+status:"active",
+createdAt:new Date()
+}
+);
+
+document.getElementById("code").value="";
+document.getElementById("discount").value="";
+document.getElementById("expiry").value="";
+
+loadCoupons();
+
+}
+
+window.loadCoupons = async()=>{
+
+const snap =
+await getDocs(
+collection(db,"coupons")
+);
+
+let html="";
+
+snap.forEach(item=>{
+
+const data=item.data();
+
+html += `
+
+<div class="coupon-card">
+
+<h2>${data.code}</h2>
+
+<p><b>Discount:</b> ${data.discount}%</p>
+
+<p><b>Expiry:</b> ${data.expiry}</p>
+
+<p><b>Status:</b> ${data.status}</p>
+
+<div class="actions">
+
+<button
+class="btn active"
+onclick="activateCoupon('${item.id}')">
+Activate
+</button>
+
+<button
+class="btn inactive"
+onclick="deactivateCoupon('${item.id}')">
+Deactivate
+</button>
+
+<button
+class="btn delete"
+onclick="deleteCoupon('${item.id}')">
+Delete
+</button>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+document.getElementById("couponList").innerHTML = html;
+
+}
+
+window.activateCoupon = async(id)=>{
+
+await updateDoc(
+doc(db,"coupons",id),
+{
+status:"active"
+}
+);
+
+loadCoupons();
+
+}
+
+window.deactivateCoupon = async(id)=>{
+
+await updateDoc(
+doc(db,"coupons",id),
+{
+status:"inactive"
+}
+);
+
+loadCoupons();
+
+}
+
+window.deleteCoupon = async(id)=>{
+
+if(!confirm("Delete Coupon ?")) return;
+
+await deleteDoc(
+doc(db,"coupons",id)
+);
+
+loadCoupons();
+
+}
+
+window.onload = loadCoupons;
+
+</script>
+
+</head>
+
+<body>
+
+<div class="header">
+Coupon Management
+</div>
+
+<div class="container">
+
+<div class="form-box">
+
+<input
+type="text"
+id="code"
+class="input"
+placeholder="Coupon Code">
+
+<input
+type="number"
+id="discount"
+class="input"
+placeholder="Discount %">
+
+<input
+type="date"
+id="expiry"
+class="input">
+
+<button
+class="btn add-btn"
+onclick="addCoupon()">
+Create Coupon
+</button>
+
+</div>
+
+<div id="couponList">
+
+</div>
+
+</div>
+
+</body>
+</html>
