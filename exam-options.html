@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exam Options</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+
+body{
+margin:0;
+font-family:Segoe UI,sans-serif;
+background:#f5f7fb;
+}
+
+.header{
+background:linear-gradient(135deg,#2563eb,#1d4ed8);
+padding:20px;
+color:white;
+}
+
+.exam-title{
+font-size:24px;
+font-weight:700;
+}
+
+.banner{
+margin:15px;
+border-radius:15px;
+overflow:hidden;
+box-shadow:0 5px 15px rgba(0,0,0,.15);
+}
+
+.banner img{
+width:100%;
+height:230px;
+object-fit:cover;
+}
+
+.option-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+padding:20px;
+}
+
+.option-card{
+background:white;
+border-radius:20px;
+padding:25px;
+text-align:center;
+cursor:pointer;
+transition:.3s;
+box-shadow:0 5px 15px rgba(0,0,0,.1);
+}
+
+.option-card:hover{
+transform:translateY(-5px);
+}
+
+.option-card img{
+width:90px;
+height:90px;
+margin-bottom:15px;
+}
+
+.option-card h2{
+margin:10px 0;
+font-size:22px;
+color:#1e293b;
+}
+
+.option-card p{
+color:#64748b;
+}
+
+.lock{
+font-size:22px;
+color:red;
+margin-top:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+<div class="exam-title" id="examName">
+Exam
+</div>
+
+</div>
+
+<div class="banner">
+
+<img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=1200">
+
+</div>
+
+<div class="option-grid">
+
+<div class="option-card" onclick="openPaid()">
+
+<img src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png">
+
+<h2>Paid Test Series</h2>
+
+<p>Premium Mock Tests</p>
+
+<div class="lock">
+🔒 Locked
+</div>
+
+</div>
+
+<div class="option-card" onclick="openFreeTest()">
+
+<img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png">
+
+<h2>Free Test Series</h2>
+
+<p>Practice Tests</p>
+
+</div>
+
+<div class="option-card" onclick="openMiniMock()">
+
+<img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png">
+
+<h2>Mini Mock</h2>
+
+<p>Quick Revision Tests</p>
+
+</div>
+
+<div class="option-card" onclick="openNotes()">
+
+<img src="https://cdn-icons-png.flaticon.com/512/2232/2232688.png">
+
+<h2>Free Notes</h2>
+
+<p>PDF Notes Download</p>
+
+</div>
+
+</div>
+
+<script>
+
+const exam =
+localStorage.getItem("selectedExam");
+
+document.getElementById("examName").innerHTML =
+exam || "Exam";
+
+function openPaid(){
+
+window.location.href="paid-test-series.html";
+
+}
+
+function openFreeTest(){
+
+window.location.href="free-test-series.html";
+
+}
+
+function openMiniMock(){
+
+window.location.href="mini-mock.html";
+
+}
+
+function openNotes(){
+
+window.location.href="free-notes.html";
+
+}
+
+</script>
+
+</body>
+</html>
