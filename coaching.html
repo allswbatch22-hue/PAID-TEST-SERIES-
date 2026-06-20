@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coaching Exams</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+
+body{
+margin:0;
+background:#f5f7fb;
+font-family:Segoe UI,sans-serif;
+}
+
+.header{
+background:linear-gradient(135deg,#2563eb,#1d4ed8);
+padding:20px;
+color:white;
+}
+
+.coaching-name{
+font-size:24px;
+font-weight:700;
+}
+
+.banner{
+margin:15px;
+border-radius:15px;
+overflow:hidden;
+box-shadow:0 5px 15px rgba(0,0,0,.15);
+}
+
+.banner img{
+width:100%;
+height:230px;
+object-fit:cover;
+}
+
+.exam-grid{
+padding:15px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:15px;
+}
+
+.exam-card{
+background:white;
+border-radius:15px;
+padding:20px;
+text-align:center;
+cursor:pointer;
+box-shadow:0 5px 15px rgba(0,0,0,.1);
+transition:.3s;
+}
+
+.exam-card:hover{
+transform:translateY(-5px);
+}
+
+.exam-card img{
+width:70px;
+height:70px;
+margin-bottom:10px;
+}
+
+.exam-card h3{
+margin:0;
+font-size:18px;
+color:#1e293b;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+<div class="coaching-name" id="coachingName">
+Coaching
+</div>
+
+</div>
+
+<div class="banner">
+
+<img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1200">
+
+</div>
+
+<div class="exam-grid">
+
+<div class="exam-card" onclick="openExam('SSC GD')">
+<img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png">
+<h3>SSC GD</h3>
+</div>
+
+<div class="exam-card" onclick="openExam('SSC CGL')">
+<img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png">
+<h3>SSC CGL</h3>
+</div>
+
+<div class="exam-card" onclick="openExam('SSC CHSL')">
+<img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png">
+<h3>SSC CHSL</h3>
+</div>
+
+<div class="exam-card" onclick="openExam('SSC MTS')">
+<img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png">
+<h3>SSC MTS</h3>
+</div>
+
+<div class="exam-card" onclick="openExam('RRB NTPC')">
+<img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png">
+<h3>RRB NTPC</h3>
+</div>
+
+<div class="exam-card" onclick="openExam('RRB GROUP D')">
+<img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png">
+<h3>RRB GROUP D</h3>
+</div>
+
+<div class="exam-card" onclick="openExam('RRB ALP')">
+<img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png">
+<h3>RRB ALP</h3>
+</div>
+
+<div class="exam-card" onclick="openExam('BANKING')">
+<img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png">
+<h3>BANKING</h3>
+</div>
+
+<div class="exam-card" onclick="openExam('POLICE')">
+<img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png">
+<h3>POLICE</h3>
+</div>
+
+<div class="exam-card" onclick="openExam('DEFENCE')">
+<img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png">
+<h3>DEFENCE</h3>
+</div>
+
+<div class="exam-card" onclick="openExam('STATE EXAM')">
+<img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png">
+<h3>STATE EXAM</h3>
+</div>
+
+<div class="exam-card" onclick="openExam('OTHER EXAMS')">
+<img src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png">
+<h3>OTHER EXAMS</h3>
+</div>
+
+</div>
+
+<script>
+
+const coaching =
+localStorage.getItem("selectedCoaching");
+
+document.getElementById("coachingName").innerHTML =
+coaching || "Premium Coaching";
+
+function openExam(exam){
+
+localStorage.setItem("selectedExam",exam);
+
+window.location.href="exam-options.html";
+
+}
+
+</script>
+
+</body>
+</html>
