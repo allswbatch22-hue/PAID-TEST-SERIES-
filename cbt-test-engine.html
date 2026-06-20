@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>CBT Test Engine</title>
+<title>Real CBT Test Engine</title>
 
 <style>
 
@@ -17,6 +17,7 @@ font-family:Segoe UI,sans-serif;
 
 body{
 background:#f1f5f9;
+overflow:hidden;
 }
 
 .header{
@@ -30,7 +31,15 @@ padding:0 20px;
 font-weight:bold;
 }
 
-.container{
+.logo{
+font-size:22px;
+}
+
+.timer{
+font-size:22px;
+}
+
+.main{
 display:flex;
 height:calc(100vh - 70px);
 }
@@ -38,52 +47,54 @@ height:calc(100vh - 70px);
 .left{
 flex:1;
 padding:20px;
+background:white;
 overflow:auto;
 }
 
 .right{
-width:300px;
-background:white;
+width:320px;
+background:#f8fafc;
 border-left:1px solid #ddd;
 padding:15px;
 overflow:auto;
 }
 
-.question-no{
-font-size:20px;
+.question-number{
+font-size:22px;
 font-weight:bold;
 margin-bottom:20px;
 }
 
 .question{
 font-size:20px;
-line-height:30px;
+line-height:32px;
 margin-bottom:20px;
 }
 
 .option{
-background:white;
 padding:15px;
-margin-bottom:12px;
+border:2px solid #cbd5e1;
 border-radius:10px;
-border:2px solid #ddd;
+margin-bottom:12px;
 cursor:pointer;
+transition:.3s;
 }
 
 .option:hover{
 border-color:#2563eb;
 }
 
-.option.selected{
+.selected{
 background:#2563eb;
+border-color:#2563eb;
 color:white;
 }
 
 .controls{
 display:flex;
 gap:10px;
-margin-top:20px;
 flex-wrap:wrap;
+margin-top:25px;
 }
 
 .btn{
@@ -91,8 +102,8 @@ padding:12px 20px;
 border:none;
 border-radius:10px;
 cursor:pointer;
-color:white;
 font-weight:bold;
+color:white;
 }
 
 .prev{
@@ -114,7 +125,7 @@ background:#dc2626;
 .palette{
 display:grid;
 grid-template-columns:repeat(5,1fr);
-gap:10px;
+gap:8px;
 }
 
 .palette-btn{
@@ -127,28 +138,29 @@ background:#cbd5e1;
 }
 
 .current{
-background:#3b82f6 !important;
+background:#2563eb!important;
 color:white;
 }
 
 .answered{
-background:#10b981 !important;
+background:#16a34a!important;
 color:white;
 }
 
 .reviewed{
-background:#f59e0b !important;
+background:#f59e0b!important;
 color:white;
 }
 
-.timer{
-font-size:22px;
-font-weight:bold;
+.loading{
+padding:50px;
+text-align:center;
+font-size:20px;
 }
 
-@media(max-width:768px){
+@media(max-width:900px){
 
-.container{
+.main{
 flex-direction:column;
 }
 
@@ -166,26 +178,34 @@ height:250px;
 
 <div class="header">
 
-<div>
-Student : Demo User
+<div class="logo">
+Premium CBT Engine
 </div>
 
 <div class="timer" id="timer">
-30:00
+Loading...
 </div>
 
 </div>
 
-<div class="container">
+<div class="main">
 
 <div class="left">
 
-<div class="question-no" id="questionNo">
-Question 1
+<div id="loadingBox" class="loading">
+Loading Test...
 </div>
 
-<div class="question" id="questionText">
-Loading...
+<div id="examArea" style="display:none;">
+
+<div
+class="question-number"
+id="questionNumber">
+</div>
+
+<div
+class="question"
+id="questionText">
 </div>
 
 <div id="optionsContainer">
@@ -193,21 +213,31 @@ Loading...
 
 <div class="controls">
 
-<button class="btn prev" onclick="previousQuestion()">
+<button
+class="btn prev"
+onclick="previousQuestion()">
 Previous
 </button>
 
-<button class="btn next" onclick="nextQuestion()">
+<button
+class="btn next"
+onclick="nextQuestion()">
 Save & Next
 </button>
 
-<button class="btn review" onclick="markReview()">
+<button
+class="btn review"
+onclick="markReview()">
 Mark Review
 </button>
 
-<button class="btn submit" onclick="submitTest()">
+<button
+class="btn submit"
+onclick="submitTest()">
 Submit
 </button>
+
+</div>
 
 </div>
 
@@ -219,7 +249,9 @@ Submit
 
 <br>
 
-<div class="palette" id="palette">
+<div
+class="palette"
+id="palette">
 </div>
 
 </div>
@@ -228,53 +260,7 @@ Submit
 
 <script>
 
-const questions=[
-
-{
-question:"भारत की राजधानी क्या है ?",
-options:[
-"मुंबई",
-"दिल्ली",
-"चेन्नई",
-"कोलकाता"
-],
-answer:1
-},
-
-{
-question:"भारत का राष्ट्रीय पशु कौन है ?",
-options:[
-"हाथी",
-"घोड़ा",
-"बाघ",
-"शेर"
-],
-answer:2
-},
-
-{
-question:"राजस्थान की राजधानी क्या है ?",
-options:[
-"जयपुर",
-"सीकर",
-"कोटा",
-"अजमेर"
-],
-answer:0
-},
-
-{
-question:"भारत का राष्ट्रीय पक्षी कौन है ?",
-options:[
-"तोता",
-"मोर",
-"कबूतर",
-"हंस"
-],
-answer:1
-}
-
-];
+let questions=[];
 
 let currentQuestion=0;
 
@@ -282,14 +268,52 @@ let answers={};
 
 let reviewQuestions=[];
 
+fetch("tests/test1.json")
+
+.then(response=>response.json())
+
+.then(data=>{
+
+questions=data;
+
+document.getElementById(
+"loadingBox"
+).style.display="none";
+
+document.getElementById(
+"examArea"
+).style.display="block";
+
+startTimer();
+
+loadQuestion(0);
+
+})
+
+.catch(error=>{
+
+document.getElementById(
+"loadingBox"
+).innerHTML=
+"Test Loading Failed";
+
+console.log(error);
+
+});
+
 function loadQuestion(index){
 
 const q=questions[index];
 
-document.getElementById("questionNo").innerHTML=
+document.getElementById(
+"questionNumber"
+).innerHTML=
+
 `Question ${index+1} / ${questions.length}`;
 
-document.getElementById("questionText").innerHTML=
+document.getElementById(
+"questionText"
+).innerHTML=
 q.question;
 
 let html="";
@@ -299,9 +323,12 @@ q.options.forEach((option,i)=>{
 html+=`
 
 <div
-class="option ${answers[index]===i ? 'selected':''}"
-onclick="selectOption(${i})"
->
+class="option ${
+answers[index]===i
+? "selected"
+: ""
+}"
+onclick="selectOption(${i})">
 
 ${option}
 
@@ -311,16 +338,18 @@ ${option}
 
 });
 
-document.getElementById("optionsContainer").innerHTML=
+document.getElementById(
+"optionsContainer"
+).innerHTML=
 html;
 
 updatePalette();
 
 }
 
-function selectOption(optionIndex){
+function selectOption(option){
 
-answers[currentQuestion]=optionIndex;
+answers[currentQuestion]=option;
 
 loadQuestion(currentQuestion);
 
@@ -328,7 +357,10 @@ loadQuestion(currentQuestion);
 
 function nextQuestion(){
 
-if(currentQuestion<questions.length-1){
+if(
+currentQuestion <
+questions.length-1
+){
 
 currentQuestion++;
 
@@ -352,59 +384,19 @@ loadQuestion(currentQuestion);
 
 function markReview(){
 
-if(!reviewQuestions.includes(currentQuestion)){
+if(
+!reviewQuestions.includes(
+currentQuestion
+)
+){
 
-reviewQuestions.push(currentQuestion);
+reviewQuestions.push(
+currentQuestion
+);
 
 }
 
 updatePalette();
-
-alert("Marked For Review");
-
-}
-
-function updatePalette(){
-
-let html="";
-
-questions.forEach((q,index)=>{
-
-let className="";
-
-if(index===currentQuestion){
-
-className="current";
-
-}
-else if(reviewQuestions.includes(index)){
-
-className="reviewed";
-
-}
-else if(answers[index]!==undefined){
-
-className="answered";
-
-}
-
-html+=`
-
-<button
-class="palette-btn ${className}"
-onclick="jumpQuestion(${index})"
->
-
-${index+1}
-
-</button>
-
-`;
-
-});
-
-document.getElementById("palette").innerHTML=
-html;
 
 }
 
@@ -416,48 +408,77 @@ loadQuestion(index);
 
 }
 
-function submitTest(){
+function updatePalette(){
 
-let correct=0;
+let html="";
 
 questions.forEach((q,index)=>{
 
-if(answers[index]===q.answer){
+let cls="";
 
-correct++;
+if(index===currentQuestion){
+
+cls="current";
 
 }
+else if(
+reviewQuestions.includes(index)
+){
+
+cls="reviewed";
+
+}
+else if(
+answers[index]!==undefined
+){
+
+cls="answered";
+
+}
+
+html+=`
+
+<button
+class="palette-btn ${cls}"
+onclick="jumpQuestion(${index})">
+
+${index+1}
+
+</button>
+
+`;
 
 });
 
-alert(
-
-`Total Questions : ${questions.length}
-
-Correct : ${correct}
-
-Wrong : ${questions.length-correct}
-
-Score : ${correct}`
-
-);
+document.getElementById(
+"palette"
+).innerHTML=
+html;
 
 }
 
-let time=1800;
+function startTimer(){
+
+let time=
+questions.length*30;
 
 setInterval(()=>{
 
 time--;
 
-let min=Math.floor(time/60);
+const min=
+Math.floor(time/60);
 
-let sec=time%60;
+const sec=
+time%60;
 
-document.getElementById("timer").innerHTML=
+document.getElementById(
+"timer"
+).innerHTML=
 
 String(min).padStart(2,"0")
-+":"
++
+":"
 +
 String(sec).padStart(2,"0");
 
@@ -469,7 +490,25 @@ submitTest();
 
 },1000);
 
-loadQuestion(0);
+}
+
+function submitTest(){
+
+localStorage.setItem(
+"user_answers",
+JSON.stringify(answers)
+);
+
+localStorage.setItem(
+"questions_data",
+JSON.stringify(questions)
+);
+
+alert(
+"REAL CBT PART 2 ME RESULT SYSTEM AAYEGA"
+);
+
+}
 
 </script>
 
