@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Management</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+
+body{
+margin:0;
+font-family:Segoe UI,sans-serif;
+background:#f5f7fb;
+}
+
+.header{
+background:#2563eb;
+color:white;
+padding:20px;
+font-size:24px;
+font-weight:700;
+}
+
+.top-bar{
+display:flex;
+gap:10px;
+padding:15px;
+flex-wrap:wrap;
+}
+
+.search{
+flex:1;
+padding:12px;
+border:1px solid #ddd;
+border-radius:10px;
+}
+
+.refresh-btn{
+padding:12px 20px;
+background:#2563eb;
+color:white;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:15px;
+padding:15px;
+}
+
+.stat-card{
+background:white;
+padding:20px;
+border-radius:15px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.stat-card h2{
+margin:0;
+color:#2563eb;
+}
+
+.user-list{
+padding:15px;
+}
+
+.user-card{
+background:white;
+padding:20px;
+margin-bottom:15px;
+border-radius:15px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.user-card h3{
+margin:0 0 10px;
+}
+
+.user-card p{
+margin:5px 0;
+}
+
+.actions{
+display:flex;
+gap:10px;
+margin-top:15px;
+flex-wrap:wrap;
+}
+
+.btn{
+padding:10px 15px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+color:white;
+}
+
+.block{
+background:#f59e0b;
+}
+
+.activate{
+background:#10b981;
+}
+
+.delete{
+background:#ef4444;
+}
+
+.loading{
+padding:20px;
+text-align:center;
+font-size:18px;
+}
+
+</style>
+
+<script type="module">
+
+import { db } from "./firebase/firebase-config.js";
+
+import {
+collection,
+getDocs,
+updateDoc,
+deleteDoc,
+doc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const usersContainer =
+document.getElementById("usersContainer");
+
+window.loadUsers = async ()=>{
+
+try{
+
+const snap =
+await getDocs(collection(db,"users"));
+
+let html="";
+
+let total=0;
+let active=0;
+let blocked=0;
+
+snap.forEach(user=>{
+
+const data=user.data();
+
+total++;
+
+if(data.status==="active"){
+active++;
+}else{
+blocked++;
+}
+
+html += `
+
+<div class="user-card">
+
+<h3>${data.name || "No Name"}</h3>
+
+<p><b>Mobile:</b> ${data.mobile}</p>
+
+<p><b>DOB:</b> ${data.dob}</p>
+
+<p><b>Status:</b> ${data.status}</p>
+
+<div class="actions">
+
+<button
+class="btn activate"
+onclick="activateUser('${user.id}')">
+Activate
+</button>
+
+<button
+class="btn block"
+onclick="blockUser('${user.id}')">
+Block
+</button>
+
+<button
+class="btn delete"
+onclick="deleteUser('${user.id}')">
+Delete
+</button>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+document.getElementById("totalUsers").innerText=total;
+document.getElementById("activeUsers").innerText=active;
+document.getElementById("blockedUsers").innerText=blocked;
+
+document.getElementById("usersContainer").innerHTML=html;
+
+}catch(error){
+
+console.log(error);
+
+document.getElementById("usersContainer").innerHTML=
+"<div class='loading'>Error Loading Users</div>";
+
+}
+
+}
+
+window.activateUser = async(id)=>{
+
+await updateDoc(
+doc(db,"users",id),
+{
+status:"active"
+}
+);
+
+loadUsers();
+
+}
+
+window.blockUser = async(id)=>{
+
+await updateDoc(
+doc(db,"users",id),
+{
+status:"blocked"
+}
+);
+
+loadUsers();
+
+}
+
+window.deleteUser = async(id)=>{
+
+const confirmDelete =
+confirm("Delete User ?");
+
+if(!confirmDelete) return;
+
+await deleteDoc(
+doc(db,"users",id)
+);
+
+loadUsers();
+
+}
+
+window.searchUsers = ()=>{
+
+const value =
+document.getElementById("searchInput")
+.value
+.toLowerCase();
+
+const cards =
+document.querySelectorAll(".user-card");
+
+cards.forEach(card=>{
+
+if(
+card.innerText.toLowerCase().includes(value)
+){
+card.style.display="block";
+}else{
+card.style.display="none";
+}
+
+});
+
+}
+
+window.onload=loadUsers;
+
+</script>
+
+</head>
+
+<body>
+
+<div class="header">
+User Management
+</div>
+
+<div class="top-bar">
+
+<input
+id="searchInput"
+class="search"
+placeholder="Search User..."
+onkeyup="searchUsers()">
+
+<button
+class="refresh-btn"
+onclick="loadUsers()">
+Refresh
+</button>
+
+</div>
+
+<div class="stats">
+
+<div class="stat-card">
+<h2 id="totalUsers">0</h2>
+<p>Total Users</p>
+</div>
+
+<div class="stat-card">
+<h2 id="activeUsers">0</h2>
+<p>Active Users</p>
+</div>
+
+<div class="stat-card">
+<h2 id="blockedUsers">0</h2>
+<p>Blocked Users</p>
+</div>
+
+</div>
+
+<div
+id="usersContainer"
+class="user-list">
+
+<div class="loading">
+Loading Users...
+</div>
+
+</div>
+
+</body>
+</html>
