@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin Results Panel</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,sans-serif;
+}
+
+body{
+background:#f1f5f9;
+}
+
+.header{
+background:#2563eb;
+color:white;
+padding:20px;
+font-size:25px;
+font-weight:bold;
+}
+
+.container{
+padding:20px;
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:15px;
+margin-bottom:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:15px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.card h2{
+color:#2563eb;
+}
+
+.filters{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:15px;
+margin-bottom:20px;
+}
+
+.input{
+width:100%;
+padding:12px;
+border:1px solid #ddd;
+border-radius:10px;
+}
+
+.btn{
+padding:12px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+background:#2563eb;
+color:white;
+font-weight:bold;
+}
+
+.table-box{
+background:white;
+padding:20px;
+border-radius:15px;
+overflow:auto;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th{
+background:#2563eb;
+color:white;
+padding:12px;
+}
+
+td{
+padding:12px;
+border-bottom:1px solid #eee;
+text-align:center;
+}
+
+.top{
+color:#16a34a;
+font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+Admin Results Panel
+</div>
+
+<div class="container">
+
+<div class="stats">
+
+<div class="card">
+<h2 id="totalResults">0</h2>
+<p>Total Results</p>
+</div>
+
+<div class="card">
+<h2 id="topScore">0</h2>
+<p>Highest Score</p>
+</div>
+
+<div class="card">
+<h2 id="totalStudents">0</h2>
+<p>Total Students</p>
+</div>
+
+</div>
+
+<div class="filters">
+
+<input
+type="text"
+id="searchBox"
+class="input"
+placeholder="Search Student">
+
+<input
+type="text"
+id="examFilter"
+class="input"
+placeholder="Exam Name">
+
+<button
+class="btn"
+onclick="loadResults()">
+Refresh
+</button>
+
+</div>
+
+<div class="table-box">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Name</th>
+<th>Mobile</th>
+<th>Exam</th>
+<th>Test</th>
+<th>Score</th>
+<th>%</th>
+<th>Date</th>
+
+</tr>
+
+</thead>
+
+<tbody id="resultsTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script type="module">
+
+import { db }
+from "./firebase/firebase-config.js";
+
+import {
+collection,
+getDocs
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+window.loadResults = async()=>{
+
+const search=
+document.getElementById("searchBox")
+.value
+.toLowerCase();
+
+const examFilter=
+document.getElementById("examFilter")
+.value
+.toLowerCase();
+
+const snap=
+await getDocs(
+collection(db,"results")
+);
+
+let html="";
+
+let total=0;
+let topScore=0;
+
+snap.forEach(doc=>{
+
+const data=doc.data();
+
+if(
+search &&
+!data.studentName
+.toLowerCase()
+.includes(search)
+){
+return;
+}
+
+if(
+examFilter &&
+!data.exam
+.toLowerCase()
+.includes(examFilter)
+){
+return;
+}
+
+total++;
+
+if(Number(data.score)>topScore){
+
+topScore=data.score;
+
+}
+
+html+=`
+
+<tr>
+
+<td>${data.studentName}</td>
+
+<td>${data.mobile}</td>
+
+<td>${data.exam}</td>
+
+<td>${data.testName}</td>
+
+<td class="top">
+${data.score}
+</td>
+
+<td>
+${data.percentage}%
+</td>
+
+<td>
+${data.submittedAt
+? "Saved"
+: "-"
+}
+</td>
+
+</tr>
+
+`;
+
+});
+
+document.getElementById(
+"resultsTable"
+).innerHTML=html;
+
+document.getElementById(
+"totalResults"
+).innerHTML=total;
+
+document.getElementById(
+"topScore"
+).innerHTML=topScore;
+
+document.getElementById(
+"totalStudents"
+).innerHTML=total;
+
+}
+
+window.onload=loadResults;
+
+</script>
+
+</body>
+</html>
