@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Result</title>
+
+<style>
+
+body{
+font-family:Segoe UI;
+background:#f5f7fb;
+padding:20px;
+}
+
+.card{
+background:white;
+padding:25px;
+border-radius:15px;
+max-width:600px;
+margin:auto;
+box-shadow:0 5px 15px rgba(0,0,0,.1);
+}
+
+h1{
+text-align:center;
+}
+
+.item{
+padding:12px;
+margin-top:10px;
+background:#f8fafc;
+border-radius:10px;
+}
+
+.pass{
+background:#10b981;
+color:white;
+padding:10px;
+margin-top:20px;
+border-radius:10px;
+text-align:center;
+}
+
+.fail{
+background:#ef4444;
+color:white;
+padding:10px;
+margin-top:20px;
+border-radius:10px;
+text-align:center;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>Test Result</h1>
+
+<div class="item">
+Correct :
+<span id="correct"></span>
+</div>
+
+<div class="item">
+Wrong :
+<span id="wrong"></span>
+</div>
+
+<div class="item">
+Score :
+<span id="score"></span>
+</div>
+
+<div class="item">
+Percentage :
+<span id="percentage"></span>%
+</div>
+
+<div id="statusBox"></div>
+
+</div>
+
+<script>
+
+const correct=
+localStorage.getItem(
+"result_correct"
+);
+
+const wrong=
+localStorage.getItem(
+"result_wrong"
+);
+
+const score=
+localStorage.getItem(
+"result_score"
+);
+
+const percentage=
+localStorage.getItem(
+"result_percentage"
+);
+
+document.getElementById(
+"correct"
+).innerHTML=correct;
+
+document.getElementById(
+"wrong"
+).innerHTML=wrong;
+
+document.getElementById(
+"score"
+).innerHTML=score;
+
+document.getElementById(
+"percentage"
+).innerHTML=percentage;
+
+if(Number(percentage)>=80){
+
+document.getElementById(
+"statusBox"
+).innerHTML=
+'<div class="pass">PASS</div>';
+
+}else{
+
+document.getElementById(
+"statusBox"
+).innerHTML=
+'<div class="fail">FAIL</div>';
+
+}
+
+</script>
+
+</body>
+</html>
