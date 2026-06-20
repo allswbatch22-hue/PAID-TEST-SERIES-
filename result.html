@@ -1,142 +1,335 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Result</title>
+<title>CBT Result</title>
 
 <style>
 
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,sans-serif;
+}
+
 body{
-font-family:Segoe UI;
-background:#f5f7fb;
+background:#f1f5f9;
 padding:20px;
+}
+
+.container{
+max-width:1000px;
+margin:auto;
+}
+
+.header{
+background:linear-gradient(135deg,#2563eb,#1d4ed8);
+color:white;
+padding:25px;
+border-radius:20px;
+text-align:center;
+margin-bottom:20px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:15px;
 }
 
 .card{
 background:white;
-padding:25px;
+padding:20px;
 border-radius:15px;
-max-width:600px;
-margin:auto;
-box-shadow:0 5px 15px rgba(0,0,0,.1);
-}
-
-h1{
 text-align:center;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
 }
 
-.item{
-padding:12px;
-margin-top:10px;
-background:#f8fafc;
-border-radius:10px;
+.card h2{
+font-size:28px;
+margin-bottom:10px;
 }
 
 .pass{
-background:#10b981;
+background:#16a34a;
 color:white;
-padding:10px;
+padding:15px;
+border-radius:15px;
 margin-top:20px;
-border-radius:10px;
 text-align:center;
+font-size:20px;
+font-weight:bold;
 }
 
 .fail{
-background:#ef4444;
+background:#dc2626;
 color:white;
-padding:10px;
+padding:15px;
+border-radius:15px;
 margin-top:20px;
-border-radius:10px;
 text-align:center;
+font-size:20px;
+font-weight:bold;
+}
+
+.btn{
+width:100%;
+padding:15px;
+border:none;
+border-radius:12px;
+margin-top:15px;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+color:white;
+}
+
+.review{
+background:#2563eb;
+}
+
+.dashboard{
+background:#0f766e;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<div class="card">
+<div class="container">
+
+<div class="header">
 
 <h1>Test Result</h1>
 
-<div class="item">
-Correct :
-<span id="correct"></span>
+<p>Detailed Performance Analysis</p>
+
 </div>
 
-<div class="item">
-Wrong :
-<span id="wrong"></span>
+<div class="grid">
+
+<div class="card">
+<h2 id="totalQuestions">0</h2>
+<p>Total Questions</p>
 </div>
 
-<div class="item">
-Score :
-<span id="score"></span>
+<div class="card">
+<h2 id="attempted">0</h2>
+<p>Attempted</p>
 </div>
 
-<div class="item">
-Percentage :
-<span id="percentage"></span>%
+<div class="card">
+<h2 id="correct">0</h2>
+<p>Correct</p>
 </div>
 
-<div id="statusBox"></div>
+<div class="card">
+<h2 id="wrong">0</h2>
+<p>Wrong</p>
+</div>
+
+<div class="card">
+<h2 id="skipped">0</h2>
+<p>Skipped</p>
+</div>
+
+<div class="card">
+<h2 id="score">0</h2>
+<p>Score</p>
+</div>
+
+<div class="card">
+<h2 id="percentage">0%</h2>
+<p>Percentage</p>
+</div>
+
+<div class="card">
+<h2 id="accuracy">0%</h2>
+<p>Accuracy</p>
+</div>
+
+<div class="card">
+<h2 id="rank">D</h2>
+<p>Rank</p>
+</div>
+
+</div>
+
+<div id="resultStatus"></div>
+
+<button
+class="btn review"
+onclick="window.location.href='answer-review.html'">
+Answer Review
+</button>
+
+<button
+class="btn dashboard"
+onclick="window.location.href='index.html'">
+Back To Home
+</button>
 
 </div>
 
 <script>
 
-const correct=
-localStorage.getItem(
-"result_correct"
-);
+const questions =
+JSON.parse(
+localStorage.getItem("questions_data")
+) || [];
 
-const wrong=
-localStorage.getItem(
-"result_wrong"
-);
+const answers =
+JSON.parse(
+localStorage.getItem("user_answers")
+) || {};
+
+let correct=0;
+let wrong=0;
+let attempted=0;
+
+questions.forEach((q,index)=>{
+
+if(answers[index]!==undefined){
+
+attempted++;
+
+if(
+answers[index]===q.answer
+){
+
+correct++;
+
+}else{
+
+wrong++;
+
+}
+
+}
+
+});
+
+const totalQuestions=
+questions.length;
+
+const skipped=
+totalQuestions-attempted;
 
 const score=
-localStorage.getItem(
-"result_score"
-);
+(correct*2)-
+(wrong*0.25);
 
 const percentage=
-localStorage.getItem(
-"result_percentage"
-);
+(
+(correct/totalQuestions)*100
+).toFixed(2);
+
+const accuracy=
+attempted>0
+?
+(
+(correct/attempted)*100
+).toFixed(2)
+:
+0;
+
+let rank="D";
+
+if(score>=180){
+
+rank="A+";
+
+}
+else if(score>=160){
+
+rank="A";
+
+}
+else if(score>=140){
+
+rank="B";
+
+}
+else if(score>=120){
+
+rank="C";
+
+}
+
+document.getElementById(
+"totalQuestions"
+).innerHTML=
+totalQuestions;
+
+document.getElementById(
+"attempted"
+).innerHTML=
+attempted;
 
 document.getElementById(
 "correct"
-).innerHTML=correct;
+).innerHTML=
+correct;
 
 document.getElementById(
 "wrong"
-).innerHTML=wrong;
+).innerHTML=
+wrong;
+
+document.getElementById(
+"skipped"
+).innerHTML=
+skipped;
 
 document.getElementById(
 "score"
-).innerHTML=score;
+).innerHTML=
+score;
 
 document.getElementById(
 "percentage"
-).innerHTML=percentage;
+).innerHTML=
+percentage+"%";
+
+document.getElementById(
+"accuracy"
+).innerHTML=
+accuracy+"%";
+
+document.getElementById(
+"rank"
+).innerHTML=
+rank;
 
 if(Number(percentage)>=80){
 
 document.getElementById(
-"statusBox"
+"resultStatus"
 ).innerHTML=
 '<div class="pass">PASS</div>';
 
 }else{
 
 document.getElementById(
-"statusBox"
+"resultStatus"
 ).innerHTML=
 '<div class="fail">FAIL</div>';
 
 }
+
+localStorage.setItem(
+"result_score",
+score
+);
+
+localStorage.setItem(
+"result_percentage",
+percentage
+);
 
 </script>
 
