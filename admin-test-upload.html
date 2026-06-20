@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin Test Upload</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,sans-serif;
+}
+
+body{
+background:#f1f5f9;
+}
+
+.header{
+background:#2563eb;
+color:white;
+padding:20px;
+font-size:24px;
+font-weight:bold;
+}
+
+.container{
+padding:20px;
+max-width:900px;
+margin:auto;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:15px;
+margin-bottom:20px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.input,
+.select{
+width:100%;
+padding:12px;
+margin-bottom:12px;
+border:1px solid #ddd;
+border-radius:10px;
+}
+
+.btn{
+width:100%;
+padding:14px;
+background:#2563eb;
+color:white;
+border:none;
+border-radius:10px;
+font-size:16px;
+cursor:pointer;
+}
+
+.success{
+margin-top:15px;
+padding:12px;
+background:#16a34a;
+color:white;
+border-radius:10px;
+display:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+Admin Test Upload Panel
+</div>
+
+<div class="container">
+
+<div class="card">
+
+<h2>Create New Test</h2>
+
+<br>
+
+<input
+type="text"
+id="testTitle"
+class="input"
+placeholder="Test Title">
+
+<select
+id="examName"
+class="select">
+
+<option value="">
+Select Exam
+</option>
+
+<option>
+SSC GD
+</option>
+
+<option>
+SSC CGL
+</option>
+
+<option>
+SSC CHSL
+</option>
+
+<option>
+RRB NTPC
+</option>
+
+<option>
+RRB GROUP D
+</option>
+
+<option>
+DELHI POLICE
+</option>
+
+</select>
+
+<select
+id="testType"
+class="select">
+
+<option value="free">
+Free Test
+</option>
+
+<option value="paid">
+Paid Test
+</option>
+
+</select>
+
+<input
+type="text"
+id="jsonFile"
+class="input"
+placeholder="tests/test1.json">
+
+<button
+class="btn"
+onclick="createTest()">
+
+Create Test
+
+</button>
+
+<div
+id="success"
+class="success">
+
+Test Created Successfully
+
+</div>
+
+</div>
+
+</div>
+
+<script type="module">
+
+import { db }
+from "./firebase/firebase-config.js";
+
+import {
+collection,
+addDoc,
+serverTimestamp
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+window.createTest = async()=>{
+
+const testTitle =
+document.getElementById(
+"testTitle"
+).value;
+
+const examName =
+document.getElementById(
+"examName"
+).value;
+
+const testType =
+document.getElementById(
+"testType"
+).value;
+
+const jsonFile =
+document.getElementById(
+"jsonFile"
+).value;
+
+if(
+!testTitle ||
+!examName ||
+!jsonFile
+){
+
+alert(
+"Fill All Fields"
+);
+
+return;
+
+}
+
+try{
+
+await addDoc(
+collection(db,"tests"),
+{
+
+title:testTitle,
+
+exam:examName,
+
+type:testType,
+
+jsonPath:jsonFile,
+
+status:"active",
+
+createdAt:
+serverTimestamp()
+
+}
+);
+
+document.getElementById(
+"success"
+).style.display=
+"block";
+
+document.getElementById(
+"testTitle"
+).value="";
+
+document.getElementById(
+"jsonFile"
+).value="";
+
+}
+catch(error){
+
+console.log(error);
+
+alert(
+"Upload Failed"
+);
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
