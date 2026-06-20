@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Management</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+
+body{
+margin:0;
+font-family:Segoe UI,sans-serif;
+background:#f5f7fb;
+}
+
+.header{
+background:#2563eb;
+color:white;
+padding:20px;
+font-size:24px;
+font-weight:700;
+}
+
+.container{
+padding:20px;
+}
+
+.form-box{
+background:white;
+padding:20px;
+border-radius:15px;
+margin-bottom:20px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.input,
+.select{
+width:100%;
+padding:12px;
+margin-bottom:12px;
+border:1px solid #ddd;
+border-radius:10px;
+box-sizing:border-box;
+}
+
+.btn{
+padding:12px 20px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+color:white;
+}
+
+.add-btn{
+background:#10b981;
+}
+
+.active{
+background:#10b981;
+}
+
+.inactive{
+background:#f59e0b;
+}
+
+.delete{
+background:#ef4444;
+}
+
+.pdf-card{
+background:white;
+padding:20px;
+border-radius:15px;
+margin-bottom:15px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.actions{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:15px;
+}
+
+.pdf-link{
+display:inline-block;
+padding:10px 15px;
+background:#2563eb;
+color:white;
+text-decoration:none;
+border-radius:8px;
+margin-top:10px;
+}
+
+</style>
+
+<script type="module">
+
+import { db } from "./firebase/firebase-config.js";
+
+import {
+collection,
+addDoc,
+getDocs,
+deleteDoc,
+updateDoc,
+doc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+window.addPdf = async()=>{
+
+const title =
+document.getElementById("title").value;
+
+const exam =
+document.getElementById("exam").value;
+
+const type =
+document.getElementById("type").value;
+
+const pdfUrl =
+document.getElementById("pdfUrl").value;
+
+if(!title || !exam || !pdfUrl){
+
+alert("Fill All Fields");
+return;
+
+}
+
+await addDoc(
+collection(db,"pdfs"),
+{
+title:title,
+exam:exam,
+type:type,
+pdfUrl:pdfUrl,
+status:"active",
+createdAt:new Date()
+}
+);
+
+document.getElementById("title").value="";
+document.getElementById("pdfUrl").value="";
+
+loadPdfs();
+
+}
+
+window.loadPdfs = async()=>{
+
+const snap =
+await getDocs(
+collection(db,"pdfs")
+);
+
+let html="";
+
+snap.forEach(item=>{
+
+const data=item.data();
+
+html += `
+
+<div class="pdf-card">
+
+<h3>${data.title}</h3>
+
+<p><b>Exam:</b> ${data.exam}</p>
+
+<p><b>Type:</b> ${data.type}</p>
+
+<p><b>Status:</b> ${data.status}</p>
+
+<a
+href="${data.pdfUrl}"
+target="_blank"
+class="pdf-link">
+Open PDF
+</a>
+
+<div class="actions">
+
+<button
+class="btn active"
+onclick="activatePdf('${item.id}')">
+Activate
+</button>
+
+<button
+class="btn inactive"
+onclick="deactivatePdf('${item.id}')">
+Deactivate
+</button>
+
+<button
+class="btn delete"
+onclick="deletePdf('${item.id}')">
+Delete
+</button>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+document.getElementById("pdfList").innerHTML =
+html;
+
+}
+
+window.activatePdf = async(id)=>{
+
+await updateDoc(
+doc(db,"pdfs",id),
+{
+status:"active"
+}
+);
+
+loadPdfs();
+
+}
+
+window.deactivatePdf = async(id)=>{
+
+await updateDoc(
+doc(db,"pdfs",id),
+{
+status:"inactive"
+}
+);
+
+loadPdfs();
+
+}
+
+window.deletePdf = async(id)=>{
+
+if(!confirm("Delete PDF ?"))
+return;
+
+await deleteDoc(
+doc(db,"pdfs",id)
+);
+
+loadPdfs();
+
+}
+
+window.onload = loadPdfs;
+
+</script>
+
+</head>
+
+<body>
+
+<div class="header">
+PDF Management
+</div>
+
+<div class="container">
+
+<div class="form-box">
+
+<input
+type="text"
+id="title"
+class="input"
+placeholder="PDF Title">
+
+<input
+type="text"
+id="exam"
+class="input"
+placeholder="Exam Name">
+
+<select
+id="type"
+class="select">
+
+<option value="free">
+Free PDF
+</option>
+
+<option value="paid">
+Paid PDF
+</option>
+
+<option value="solution">
+Solution PDF
+</option>
+
+</select>
+
+<input
+type="text"
+id="pdfUrl"
+class="input"
+placeholder="PDF URL">
+
+<button
+class="btn add-btn"
+onclick="addPdf()">
+Add PDF
+</button>
+
+</div>
+
+<div id="pdfList">
+
+</div>
+
+</div>
+
+</body>
+</html>
