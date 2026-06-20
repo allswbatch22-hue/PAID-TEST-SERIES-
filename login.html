@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<script type="module">
+import { db } from "./firebase/firebase-config.js";
+import {
+collection,
+query,
+where,
+getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+window.loginUser = async () => {
+
+const mobile=document.getElementById("mobile").value.trim();
+const password=document.getElementById("password").value.trim();
+
+if(!mobile || !password){
+alert("Fill all fields");
+return;
+}
+
+try{
+
+const q=query(
+collection(db,"users"),
+where("mobile","==",mobile),
+where("password","==",password)
+);
+
+const snap=await getDocs(q);
+
+if(snap.empty){
+alert("Invalid Mobile Or Password");
+return;
+}
+
+const user=snap.docs[0].data();
+
+localStorage.setItem("userName",user.name);
+localStorage.setItem("userMobile",user.mobile);
+
+window.location.href="dashboard.html";
+
+}catch(error){
+console.error(error);
+alert("Login Failed");
+}
+
+}
+</script>
+
+</head>
+<body>
+
+<div class="auth-container">
+
+<div class="auth-card">
+
+<h2>Login</h2>
+
+<input
+type="text"
+id="mobile"
+placeholder="Mobile Number"
+maxlength="10">
+
+<input
+type="password"
+id="password"
+placeholder="Password">
+
+<button onclick="loginUser()">Login</button>
+
+<div class="links">
+
+<a href="register.html">
+Create Account
+</a>
+
+<a href="forgot-password.html">
+Forgot Password
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>
