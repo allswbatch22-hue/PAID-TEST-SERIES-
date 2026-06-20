@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paid Test Series</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+
+body{
+margin:0;
+background:#f5f7fb;
+font-family:Segoe UI,sans-serif;
+}
+
+.header{
+background:linear-gradient(135deg,#2563eb,#1d4ed8);
+padding:20px;
+color:white;
+}
+
+.exam-name{
+font-size:24px;
+font-weight:700;
+}
+
+.price-box{
+background:white;
+margin:15px;
+padding:20px;
+border-radius:15px;
+box-shadow:0 5px 15px rgba(0,0,0,.1);
+}
+
+.old-price{
+font-size:18px;
+text-decoration:line-through;
+color:red;
+}
+
+.new-price{
+font-size:28px;
+font-weight:700;
+color:green;
+}
+
+.discount{
+color:#2563eb;
+font-weight:700;
+margin-top:10px;
+}
+
+.input-box{
+width:100%;
+padding:14px;
+margin-top:12px;
+border:1px solid #ddd;
+border-radius:10px;
+}
+
+.btn{
+width:100%;
+padding:14px;
+margin-top:12px;
+border:none;
+border-radius:10px;
+background:#2563eb;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+.instruction-btn{
+background:#f59e0b;
+}
+
+.test-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:15px;
+padding:15px;
+}
+
+.test-card{
+background:white;
+padding:20px;
+border-radius:15px;
+text-align:center;
+box-shadow:0 5px 15px rgba(0,0,0,.1);
+}
+
+.lock{
+font-size:35px;
+margin-top:10px;
+}
+
+.unlock{
+font-size:35px;
+color:green;
+margin-top:10px;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="header">
+
+<div class="exam-name" id="examName">
+Paid Test Series
+</div>
+
+</div>
+
+<div class="price-box">
+
+<div class="old-price">
+₹999
+</div>
+
+<div class="new-price" id="finalPrice">
+₹999
+</div>
+
+<div class="discount" id="discountText">
+No Discount Applied
+</div>
+
+<input
+type="text"
+id="couponCode"
+class="input-box"
+placeholder="Enter Coupon Code">
+
+<button
+class="btn"
+onclick="applyCoupon()">
+Apply Coupon
+</button>
+
+<input
+type="text"
+id="buyCode"
+class="input-box"
+placeholder="Enter Buy Code">
+
+<button
+class="btn"
+onclick="unlockTests()">
+Unlock Tests
+</button>
+
+<button
+class="btn instruction-btn"
+onclick="openInstructions()">
+Buy Code Kaise Prapt Kare
+</button>
+
+</div>
+
+<div class="test-grid">
+
+<div class="test-card">
+<h3>Full Mock Test 01</h3>
+<div id="lock1" class="lock">🔒</div>
+</div>
+
+<div class="test-card">
+<h3>Full Mock Test 02</h3>
+<div id="lock2" class="lock">🔒</div>
+</div>
+
+<div class="test-card">
+<h3>Full Mock Test 03</h3>
+<div id="lock3" class="lock">🔒</div>
+</div>
+
+<div class="test-card">
+<h3>Full Mock Test 04</h3>
+<div id="lock4" class="lock">🔒</div>
+</div>
+
+<div class="test-card">
+<h3>Full Mock Test 05</h3>
+<div id="lock5" class="lock">🔒</div>
+</div>
+
+<div class="test-card">
+<h3>Full Mock Test 06</h3>
+<div id="lock6" class="lock">🔒</div>
+</div>
+
+</div>
+
+<script>
+
+const exam =
+localStorage.getItem("selectedExam");
+
+document.getElementById("examName").innerHTML =
+exam + " Paid Test Series";
+
+function applyCoupon(){
+
+const coupon =
+document.getElementById("couponCode").value;
+
+if(coupon==="ROJGAR50"){
+
+document.getElementById("finalPrice").innerHTML =
+"₹499";
+
+document.getElementById("discountText").innerHTML =
+"₹500 Discount Applied";
+
+alert("Coupon Applied");
+
+}else{
+
+alert("Invalid Coupon");
+
+}
+
+}
+
+function unlockTests(){
+
+const code =
+document.getElementById("buyCode").value;
+
+if(code==="PREMIUM2026"){
+
+localStorage.setItem(
+exam+"_unlock",
+"true"
+);
+
+for(let i=1;i<=6;i++){
+
+document.getElementById(
+"lock"+i
+).innerHTML="✅";
+
+document.getElementById(
+"lock"+i
+).className="unlock";
+
+}
+
+alert("All Tests Unlocked");
+
+}else{
+
+alert("Invalid Buy Code");
+
+}
+
+}
+
+function openInstructions(){
+
+window.location.href=
+"instructions.html";
+
+}
+
+window.onload=()=>{
+
+if(localStorage.getItem(
+exam+"_unlock"
+)==="true"){
+
+for(let i=1;i<=6;i++){
+
+document.getElementById(
+"lock"+i
+).innerHTML="✅";
+
+document.getElementById(
+"lock"+i
+).className="unlock";
+
+}
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
