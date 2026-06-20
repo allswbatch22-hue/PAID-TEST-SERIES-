@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Apply Coupon</title>
+
+<style>
+
+body{
+font-family:Segoe UI;
+background:#f1f5f9;
+padding:20px;
+}
+
+.card{
+background:white;
+padding:25px;
+border-radius:15px;
+max-width:500px;
+margin:auto;
+box-shadow:0 5px 15px rgba(0,0,0,.1);
+}
+
+input{
+width:100%;
+padding:14px;
+border:1px solid #ddd;
+border-radius:10px;
+margin-bottom:15px;
+}
+
+button{
+width:100%;
+padding:14px;
+border:none;
+background:#2563eb;
+color:white;
+border-radius:10px;
+cursor:pointer;
+}
+
+.price{
+font-size:22px;
+font-weight:bold;
+margin-top:15px;
+}
+
+.discount{
+color:#16a34a;
+font-weight:bold;
+margin-top:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Apply Coupon</h2>
+
+<br>
+
+<input
+type="text"
+id="couponCode"
+placeholder="Enter Coupon Code">
+
+<button
+onclick="applyCoupon()">
+
+Apply Coupon
+
+</button>
+
+<div
+class="discount"
+id="discountBox">
+</div>
+
+<div
+class="price"
+id="finalPrice">
+
+₹0
+
+</div>
+
+</div>
+
+<script type="module">
+
+import {
+applyCoupon
+}
+from "./coupon-system.js";
+
+window.applyCoupon=
+applyCoupon;
+
+const price=
+localStorage.getItem(
+"examPrice"
+) || 0;
+
+document.getElementById(
+"finalPrice"
+).innerHTML=
+"₹"+price;
+
+</script>
+
+</body>
+</html>
