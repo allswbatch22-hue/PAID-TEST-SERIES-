@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Page</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,sans-serif;
+}
+
+body{
+background:#f1f5f9;
+padding:20px;
+}
+
+.container{
+max-width:700px;
+margin:auto;
+}
+
+.card{
+background:#fff;
+padding:25px;
+border-radius:20px;
+box-shadow:0 5px 20px rgba(0,0,0,.08);
+margin-bottom:20px;
+}
+
+.title{
+font-size:26px;
+font-weight:700;
+color:#2563eb;
+margin-bottom:20px;
+text-align:center;
+}
+
+.row{
+margin-bottom:15px;
+}
+
+label{
+display:block;
+margin-bottom:6px;
+font-weight:600;
+}
+
+input{
+width:100%;
+padding:14px;
+border:1px solid #ddd;
+border-radius:10px;
+}
+
+.amount-box{
+background:#eff6ff;
+padding:20px;
+border-radius:15px;
+text-align:center;
+}
+
+.old-price{
+font-size:20px;
+text-decoration:line-through;
+color:#ef4444;
+}
+
+.new-price{
+font-size:35px;
+font-weight:bold;
+color:#16a34a;
+margin-top:10px;
+}
+
+.qr{
+width:250px;
+height:250px;
+object-fit:contain;
+display:block;
+margin:auto;
+border-radius:10px;
+border:1px solid #ddd;
+}
+
+.upi-box{
+background:#f8fafc;
+padding:15px;
+border-radius:10px;
+text-align:center;
+font-weight:bold;
+margin-top:15px;
+}
+
+.btn{
+width:100%;
+padding:15px;
+border:none;
+border-radius:12px;
+background:#2563eb;
+color:white;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.notice{
+background:#fff7ed;
+padding:15px;
+border-left:5px solid orange;
+border-radius:10px;
+margin-top:15px;
+}
+
+.success{
+background:#dcfce7;
+padding:15px;
+border-radius:10px;
+display:none;
+margin-top:15px;
+color:#166534;
+font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<div class="title">
+Premium Test Series Payment
+</div>
+
+<div class="amount-box">
+
+<div class="old-price" id="oldPrice">
+₹299
+</div>
+
+<div class="new-price" id="finalPrice">
+₹299
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>UPI Payment QR</h3>
+
+<br>
+
+<img
+class="qr"
+src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay"
+alt="QR">
+
+<div class="upi-box">
+
+UPI ID:
+yourupi@upi
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>Payment Details</h3>
+
+<br>
+
+<div class="row">
+
+<label>Student Name</label>
+
+<input
+type="text"
+id="studentName"
+placeholder="Enter Name">
+
+</div>
+
+<div class="row">
+
+<label>Mobile Number</label>
+
+<input
+type="text"
+id="mobile"
+placeholder="Enter Mobile Number">
+
+</div>
+
+<div class="row">
+
+<label>Exam Name</label>
+
+<input
+type="text"
+id="exam"
+placeholder="SSC GD">
+
+</div>
+
+<div class="row">
+
+<label>Payment Screenshot URL</label>
+
+<input
+type="text"
+id="screenshotUrl"
+placeholder="Paste Uploaded Screenshot URL">
+
+</div>
+
+<button
+class="btn"
+onclick="submitPayment()">
+
+Submit Payment
+
+</button>
+
+<div
+id="success"
+class="success">
+
+Payment Submitted Successfully
+
+</div>
+
+<div class="notice">
+
+<b>Important:</b><br><br>
+
+1. Payment Screenshot Upload करें।<br>
+2. Admin Verification के बाद Buy Code मिलेगा।<br>
+3. Buy Code Apply करके Paid Tests Unlock होंगे।
+
+</div>
+
+</div>
+
+</div>
+
+<script type="module">
+
+import { db }
+from "./firebase/firebase-config.js";
+
+import {
+collection,
+addDoc,
+serverTimestamp
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+window.submitPayment = async()=>{
+
+const studentName =
+document.getElementById(
+"studentName"
+).value;
+
+const mobile =
+document.getElementById(
+"mobile"
+).value;
+
+const exam =
+document.getElementById(
+"exam"
+).value;
+
+const screenshot =
+document.getElementById(
+"screenshotUrl"
+).value;
+
+const amount =
+localStorage.getItem(
+"finalPrice"
+) || 299;
+
+if(
+!studentName ||
+!mobile ||
+!exam ||
+!screenshot
+){
+
+alert(
+"Fill All Fields"
+);
+
+return;
+
+}
+
+try{
+
+await addDoc(
+collection(db,"payments"),
+{
+
+studentName,
+mobile,
+exam,
+amount,
+screenshot,
+
+status:"pending",
+
+submittedAt:
+serverTimestamp()
+
+}
+);
+
+document.getElementById(
+"success"
+).style.display=
+"block";
+
+}
+catch(error){
+
+console.log(error);
+
+alert(
+"Payment Submission Failed"
+);
+
+}
+
+};
+
+const finalPrice =
+localStorage.getItem(
+"finalPrice"
+);
+
+if(finalPrice){
+
+document.getElementById(
+"finalPrice"
+).innerHTML=
+"₹"+finalPrice;
+
+}
+
+</script>
+
+</body>
+</html>
